@@ -32,9 +32,11 @@ Describe 'Sync-LabUsers.ps1' {
 
 Describe 'Reset-LabPassword.ps1' {
     It 'resets the password and writes the new one to the passwords file' {
+        $file = Join-Path $script:OutDir 'new-passwords.txt'
+        $before = @(Get-Content $file | Where-Object { $_ -like 'psci.alice*' }).Count
         & (Join-Path $script:Scripts 'Reset-LabPassword.ps1') -Username 'psci.alice' -OutDir $script:OutDir
-        $lines = Get-Content (Join-Path $script:OutDir 'new-passwords.txt')
-        ($lines | Where-Object { $_ -like 'psci.alice*' }).Count | Should -Be 1
+        $after = @(Get-Content $file | Where-Object { $_ -like 'psci.alice*' }).Count
+        $after | Should -Be ($before + 1)
     }
 
     It 'refuses an unknown user' {
