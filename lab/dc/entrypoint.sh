@@ -10,6 +10,8 @@ set -euo pipefail
 marker=/var/lib/samba/.lab-provisioned
 if [ ! -f "$marker" ]; then
   echo "First start: creating domain ${SAMBA_REALM} ..."
+  # No marker means no earlier provisioning finished. Clear any partial data so it starts clean.
+  find /var/lib/samba -mindepth 1 -delete
   rm -f /etc/samba/smb.conf /etc/krb5.conf
   samba-tool domain provision \
     --use-rfc2307 \
