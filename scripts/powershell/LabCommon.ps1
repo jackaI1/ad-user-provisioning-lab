@@ -43,7 +43,11 @@ function Test-LabGroup {
 function Test-LabDn {
     # True when the object exists in the directory.
     param([Parameter(Mandatory)][string]$Dn)
-    $r = Invoke-Dc ldapsearch -x -LLL -H ldap://127.0.0.1 -D $script:AdminDn -w $script:AdminPassword -b $Dn -s base dn
+    # Pass the arguments as an array. Bare "-w" and "-D" are read by PowerShell as its own
+    # parameters (-w is ambiguous, -D is taken as -Debug), so the bind DN was silently dropped.
+    $cmd = @('ldapsearch', '-x', '-LLL', '-H', 'ldap://127.0.0.1', '-D', $script:AdminDn,
+        '-w', $script:AdminPassword, '-b', $Dn, '-s', 'base', 'dn')
+    $r = Invoke-Dc @cmd
     return $r.ExitCode -eq 0
 }
 
