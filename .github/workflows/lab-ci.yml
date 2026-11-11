@@ -1,0 +1,63 @@
+name: lab-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: shellcheck -x -P SCRIPTDIR lab/dc/entrypoint.sh scripts/bash/*.sh tests/bash/*.sh tests/integration/*.sh
+
+  offline-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stale report tests (no Docker)
+        run: bash tests/bash/test-stale-report.sh
+
+  lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create lab settings with a random admin password
+        run: |
+          pw="Lab$(openssl rand -hex 12)!9"
+          echo "::add-mask::$pw"
+          printf 'SAMBA_REALM=LAB.EXAMPLE\nSAMBA_DOMAIN=LAB\nSAMBA_ADMIN_PASSWORD=%s\n' "$pw" > lab/.env
+
+      - name: Build and start the Samba domain controller
+        run: docker compose -f lab/docker-compose.yml up -d --build
+
+      - name: Wait for the domain controller
+        run: bash scripts/bash/wait-for-dc.sh
+
+      - name: Bash scripts against the live domain
+        run: bash tests/integration/test-bash.sh
+
+      - name: Lab report
+        run: bash scripts/bash/stale-report.sh --days 90
+
+      - name: PowerShell scripts against the live domain
+        shell: pwsh
+        run: |
+          Install-Module Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser
+          Invoke-Pester -Path tests/powershell -CI
+
+      - name: Domain controller logs (on failure)
+        if: failure()
+        run: docker compose -f lab/docker-compose.yml logs --no-color --tail 200 dc
+
+      - name: Stop the lab
+        if: always()
+        run: docker compose -f lab/docker-compose.yml down -v

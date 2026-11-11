@@ -1,0 +1,3 @@
+# Real settings and generated passwords never go in git.
+lab/.env
+out/
