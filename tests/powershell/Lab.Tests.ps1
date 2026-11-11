@@ -2,10 +2,12 @@
 # domain controller, so the lab must be running (see the README).
 # Run: Invoke-Pester -Path tests/powershell
 
-$script:Scripts = Join-Path $PSScriptRoot '..' '..' 'scripts' 'powershell'
-. (Join-Path $script:Scripts 'LabCommon.ps1')
-$script:Csv = Join-Path $PSScriptRoot '..' 'fixtures' 'ci-powershell.csv'
-$script:OutDir = Join-Path ([System.IO.Path]::GetTempPath()) "lab-pester-$([guid]::NewGuid())"
+BeforeAll {
+    $script:Scripts = Join-Path $PSScriptRoot '..' '..' 'scripts' 'powershell'
+    . (Join-Path $script:Scripts 'LabCommon.ps1')
+    $script:Csv = Join-Path $PSScriptRoot '..' 'fixtures' 'ci-powershell.csv'
+    $script:OutDir = Join-Path ([System.IO.Path]::GetTempPath()) "lab-pester-$([guid]::NewGuid())"
+}
 
 AfterAll {
     if (Test-Path $script:OutDir) { Remove-Item -Recurse -Force $script:OutDir }
