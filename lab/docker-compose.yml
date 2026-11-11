@@ -1,0 +1,21 @@
+# Runs the Samba domain controller. Secrets live in lab/.env (not committed).
+name: ad-lab
+
+services:
+  dc:
+    build: .
+    image: ad-lab-samba-dc:local
+    hostname: dc.lab.example
+    environment:
+      SAMBA_REALM: ${SAMBA_REALM:-LAB.EXAMPLE}
+      SAMBA_DOMAIN: ${SAMBA_DOMAIN:-LAB}
+      SAMBA_ADMIN_PASSWORD: ${SAMBA_ADMIN_PASSWORD:?Set SAMBA_ADMIN_PASSWORD in lab/.env (see lab/.env.example)}
+    volumes:
+      # Domain database and keys survive restarts.
+      - samba-state:/var/lib/samba
+      - samba-config:/etc/samba
+    restart: unless-stopped
+
+volumes:
+  samba-state:
+  samba-config:

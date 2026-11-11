@@ -1,0 +1,4 @@
+username,given_name,surname,ou,groups
+psci.alice,Alice,Tester,Staff,Printers
+psci.bob,Bob,Tester,Contractors,Finance
+psci.carol,Carol,Tester,Contractors,Finance;Printers

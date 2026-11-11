@@ -1,0 +1,4 @@
+username,given_name,surname,ou,groups
+ci.alice,Alice,Tester,Staff,Finance;Printers
+ci.bob,Bob,Tester,Staff,Printers
+ci.lock,Lock,Tester,Staff,
