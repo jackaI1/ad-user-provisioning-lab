@@ -54,18 +54,19 @@ check() {  # check DESCRIPTION OK-STATUS
   fi
 }
 has() { case "$1" in *"$2"*) echo yes ;; *) echo no ;; esac; }
+absent() { case "$1" in *"$2"*) echo no ;; *) echo yes ;; esac; }
 
 out=$("$report_script" --days 90 --ldif "$tmp/dump.ldif")
 
 check "bob (200 days, enabled) is stale" "$(has "$out" "  bob  (last sign-in 200 days ago)")"
 check "carol (never signed in) is stale" "$(has "$out" "  carol  (never signed in)")"
 check "erin is reported as locked out" "$(has "$out" "  erin  (lockout time is set")"
-check "alice (signed in 5 days ago) is not reported" "$([ "$(has "$out" "  alice  ")" = no ] && echo yes || echo no)"
-check "frank (lockout time 0) is not locked" "$([ "$(has "$out" "  frank  (lockout")" = no ] && echo yes || echo no)"
-check "dave (disabled) is skipped" "$([ "$(has "$out" "dave")" = no ] && echo yes || echo no)"
+check "alice (signed in 5 days ago) is not reported" "$(absent "$out" "  alice  ")"
+check "frank (lockout time 0) is not locked" "$(absent "$out" "  frank  (lockout")"
+check "dave (disabled) is skipped" "$(absent "$out" "dave")"
 
 short=$("$report_script" --days 365 --ldif "$tmp/dump.ldif")
-check "a 365-day limit leaves bob out" "$([ "$(has "$short" "  bob  (")" = no ] && echo yes || echo no)"
+check "a 365-day limit leaves bob out" "$(absent "$short" "  bob  (")"
 
 if "$report_script" --days abc --ldif "$tmp/dump.ldif" >/dev/null 2>&1; then
   check "a non-number --days is rejected" no

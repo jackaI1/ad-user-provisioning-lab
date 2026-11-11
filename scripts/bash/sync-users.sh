@@ -13,7 +13,9 @@ set -euo pipefail
 source "$(dirname "$0")/lib.sh"
 
 csv="${1:-}"
-[ -n "$csv" ] && [ -f "$csv" ] || die "usage: $0 USERS.csv"
+if [ -z "$csv" ] || [ ! -f "$csv" ]; then
+  die "usage: $0 USERS.csv"
+fi
 check_lab
 
 ensure_group() {
