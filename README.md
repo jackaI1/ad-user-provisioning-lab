@@ -89,4 +89,9 @@ Running the sync again is safe. Users and groups that exist are left alone, and 
 
 ## Test results
 
-Numbers from the latest CI run are at the bottom of the pull request. The offline report test passes 8 of 8 checks on my machine.
+The last CI run passed every job:
+
+- Offline stale-report test: 8 of 8 checks.
+- Bash scripts against the live domain: 7 of 7 checks.
+- PowerShell scripts against the live domain (Pester): 5 of 5 tests.
+- Shellcheck on all shell scripts: clean.
